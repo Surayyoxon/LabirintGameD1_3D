@@ -30,7 +30,7 @@ public class UIManager : MonoBehaviour
 
 
     // =========================================================
-    // GAME PANEL
+    // GAME PANEL - SCORE
     // =========================================================
 
     [Header("Score")]
@@ -38,11 +38,22 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TMP_Text simpleScoreText;
     [SerializeField] private TMP_Text bonusScoreText;
 
+
+    // =========================================================
+    // HEALTH
+    // =========================================================
+
     [Header("Health")]
     [SerializeField] private Image healthBarImage;
     [SerializeField] private TMP_Text healthScoreText;
 
-    [Header("Power")]
+
+    // =========================================================
+    // POWER BAR
+    // =========================================================
+
+    [Header("Power Bar")]
+    [SerializeField] private GameObject powerBar;
     [SerializeField] private Image powerBarImage;
     [SerializeField] private TMP_Text powerScoreText;
 
@@ -87,6 +98,9 @@ public class UIManager : MonoBehaviour
         UpdateLevelText();
         LoadMusicState();
 
+        // Power bar o'yin boshida yashirin
+        HidePowerBar();
+
         ShowMainMenu();
     }
 
@@ -122,6 +136,9 @@ public class UIManager : MonoBehaviour
         pausePanel.SetActive(false);
         youWinPanel.SetActive(false);
         youDiedPanel.SetActive(false);
+
+        // Har safar game boshlanganda power bar yashirin
+        HidePowerBar();
 
         Time.timeScale = 1f;
     }
@@ -238,7 +255,6 @@ public class UIManager : MonoBehaviour
         int bonusScore =
             playerCollect.GetBonusScore();
 
-
         allScoreText.text =
             allScore + " / " + targetScore;
 
@@ -285,7 +301,10 @@ public class UIManager : MonoBehaviour
     private void UpdatePowerUI()
     {
         if (playerPowerPallet == null)
+        {
+            HidePowerBar();
             return;
+        }
 
         float remainingTime =
             playerPowerPallet.GetRemainingPowerTime();
@@ -293,19 +312,50 @@ public class UIManager : MonoBehaviour
         float duration =
             playerPowerPallet.GetPowerDuration();
 
-        float powerPercent = 0f;
+        // Power aktiv emas
+        if (!playerPowerPallet.IsPoweredUp())
+        {
+            HidePowerBar();
+            return;
+        }
+
+        // Power aktiv
+        ShowPowerBar();
 
         if (duration > 0f)
         {
-            powerPercent =
+            powerBarImage.fillAmount =
                 remainingTime / duration;
         }
 
-        powerBarImage.fillAmount =
-            powerPercent;
-
         powerScoreText.text =
             Mathf.CeilToInt(remainingTime) + "s";
+    }
+
+
+    // =========================================================
+    // SHOW POWER BAR
+    // =========================================================
+
+    private void ShowPowerBar()
+    {
+        if (powerBar != null)
+        {
+            powerBar.SetActive(true);
+        }
+    }
+
+
+    // =========================================================
+    // HIDE POWER BAR
+    // =========================================================
+
+    private void HidePowerBar()
+    {
+        if (powerBar != null)
+        {
+            powerBar.SetActive(false);
+        }
     }
 
 
@@ -339,6 +389,8 @@ public class UIManager : MonoBehaviour
         pausePanel.SetActive(false);
         youWinPanel.SetActive(true);
 
+        HidePowerBar();
+
         Time.timeScale = 0f;
     }
 
@@ -369,6 +421,8 @@ public class UIManager : MonoBehaviour
         gamePanel.SetActive(false);
         pausePanel.SetActive(false);
         youDiedPanel.SetActive(true);
+
+        HidePowerBar();
 
         Time.timeScale = 0f;
     }

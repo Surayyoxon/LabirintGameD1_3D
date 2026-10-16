@@ -8,7 +8,7 @@ public class PlayerPowerPallet : MonoBehaviour
 
     private bool isPoweredUp = false;
 
-    private float remainingPowerTime;
+    private float powerEndTime;
 
     private Coroutine powerCoroutine;
 
@@ -31,8 +31,7 @@ public class PlayerPowerPallet : MonoBehaviour
             StopCoroutine(powerCoroutine);
         }
 
-        powerCoroutine =
-            StartCoroutine(PowerMode());
+        powerCoroutine = StartCoroutine(PowerMode());
     }
 
 
@@ -40,22 +39,16 @@ public class PlayerPowerPallet : MonoBehaviour
     {
         isPoweredUp = true;
 
-        remainingPowerTime =
-            powerDuration;
+        powerEndTime =
+            Time.time + powerDuration;
 
         Debug.Log("POWER MODE ON!");
 
-        while (remainingPowerTime > 0f)
-        {
-            remainingPowerTime -=
-                Time.deltaTime;
-
-            yield return null;
-        }
-
-        remainingPowerTime = 0f;
+        yield return new WaitForSeconds(powerDuration);
 
         isPoweredUp = false;
+
+        powerEndTime = 0f;
 
         Debug.Log("POWER MODE OFF!");
 
@@ -71,7 +64,13 @@ public class PlayerPowerPallet : MonoBehaviour
 
     public float GetRemainingPowerTime()
     {
-        return remainingPowerTime;
+        if (!isPoweredUp)
+            return 0f;
+
+        return Mathf.Max(
+            0f,
+            powerEndTime - Time.time
+        );
     }
 
 
